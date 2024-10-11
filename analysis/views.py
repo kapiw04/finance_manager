@@ -24,4 +24,3 @@ class BudgetStatusView(APIView):
         )
 
         return Response({"is_in_budget": is_in_budget})
-

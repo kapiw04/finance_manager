@@ -6,17 +6,16 @@ from django.urls import reverse
 from transactions.models import Transaction, TransactionCategory
 from user_prefs.models import Prefs
 
-
 # initialize the APIClient app
 client = Client()
 
 
-class TestIfOverBudget(TestCase):
+class TestBudgetStatus(TestCase):
     def setUp(self):
-        Prefs.objects.create(
-            budget_amount=100,
-            budget_period_in_days=1,
-        )
+        prefs = Prefs.get_instance()
+        prefs.budget_period_in_days = 1
+        prefs.budget_amount = 100
+        prefs.save()
         TransactionCategory.objects.create(
             name="Category 1",
         )
@@ -37,3 +36,20 @@ class TestIfOverBudget(TestCase):
         response = client.get(reverse('budget-status'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['is_in_budget'], False)
+
+    def test_setting_budget(self):
+        new_budget_amount = 200
+        new_budget_period_in_days = 3
+        payload = {'budget_amount': new_budget_amount,
+                   'budget_period_in_days': new_budget_period_in_days}
+        response = client.put(reverse('user_prefs_update'),
+                               data=json.dumps(payload),
+                               content_type='application/json'
+                               )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = client.get(reverse('user_prefs_update'))
+        self.assertEqual(response.data['budget_amount'], new_budget_amount)
+        self.assertEqual(response.data['budget_period_in_days'], new_budget_period_in_days)
+        response = client.get(reverse('budget-status'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['is_in_budget'], True)
