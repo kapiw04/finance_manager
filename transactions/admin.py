@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from transactions.models import Transaction, TransactionCategory, UserPreferences
+from transactions.models import Transaction, TransactionCategory
 
 
 # Register your models here.
@@ -12,7 +12,3 @@ class TransactionCategoryAdmin(admin.ModelAdmin):
 class TransactionCategoryAdmin(admin.ModelAdmin):
     pass
 
-
-@admin.register(UserPreferences)
-class UserPreferencesAdmin(admin.ModelAdmin):
-    pass
